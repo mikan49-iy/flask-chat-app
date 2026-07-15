@@ -26,6 +26,9 @@ def create_app():
 
     from . import models
 
+    from .cli import create_admin
+    app.cli.add_command(create_admin)
+
     @app.route("/")
     def index():
         return "Hello, Chat App!"

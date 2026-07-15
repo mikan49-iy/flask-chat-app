@@ -1,0 +1,33 @@
+import os
+
+from flask import Flask
+
+from .extensions import db, migrate
+
+
+def create_app():
+    app = Flask(__name__)
+
+    secret_key = os.environ.get("SECRET_KEY")
+    database_url = os.environ.get("DATABASE_URL")
+
+    if not secret_key:
+        raise RuntimeError("SECRET_KEYが設定されていません")
+
+    if not database_url:
+        raise RuntimeError("DATABASE_URLが設定されていません")
+
+    app.config["SECRET_KEY"] = secret_key
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    from . import models
+
+    @app.route("/")
+    def index():
+        return "Hello, Chat App!"
+
+    return app

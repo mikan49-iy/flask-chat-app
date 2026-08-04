@@ -1,5 +1,8 @@
 Flask
 Flask-SQLAlchemy
 Flask-Migrate
+Flask-Login
+Flask-WTF
+email-validator
 PyMySQL[rsa]
 python-dotenv

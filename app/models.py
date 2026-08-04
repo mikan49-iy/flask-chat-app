@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
+from flask_login import UserMixin
 from .extensions import db
 
 def utc_now():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)

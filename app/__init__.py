@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask
+from flask import Flask, redirect, request, url_for
+from flask_login import current_user
 
 from .extensions import db, migrate, login_manager
 
@@ -36,6 +37,28 @@ def create_app():
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+
+    @app.before_request
+    def require_password_change():
+        if not current_user.is_authenticated:
+            return None
+
+        if current_user.role != "user":
+            return None
+
+        if not current_user.must_change_password:
+            return None
+
+        allowed_endpoints = {
+            "auth.password_change",
+            "auth.logout",
+            "static",
+        }
+
+        if request.endpoint not in allowed_endpoints:
+            return redirect(url_for("auth.password_change"))
+
+        return None
 
     @app.route("/")
     def index():

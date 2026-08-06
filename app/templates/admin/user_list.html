@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}ユーザー一覧{% endblock %}
+
+{% block content %} 
+  <h2>ユーザー一覧</h2>
+  <a href="{{ url_for('admin.user_create') }}">新規ユーザー登録</a>
+  <div>
+    <h3>有効ユーザー</h3>
+    {% if active_users %}
+        {% for user in active_users %}
+        <div>
+            <div>
+                <p>{{ user.name }}</p>
+
+                {% if user.department %}
+                  <p>{{ user.department }}</p>
+                {% endif %}
+
+                <p>{{ user.email }}</p>
+
+                {% if user.must_change_password %}
+                  <span>パスワード未変更</span>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
+                <a href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
+                <form action="{{ url_for('admin.user_deactivate', user_id=user.id) }}" method="POST">
+                    {{ action_form.hidden_tag() }}
+                    <button type="submit">無効にする</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+    {% else %}
+        <p>該当するユーザーがいません</p>
+    {% endif %}
+  </div>
+
+  <div>
+    <h3>無効ユーザー</h3>
+    {% if inactive_users %}
+        {% for user in inactive_users %}
+        <div>
+            <div>
+                <p>{{ user.name }}</p>
+                <span>無効</span>
+
+                {% if user.department %}
+                  <p>{{ user.department }}</p>
+                {% endif %}
+
+                <p>{{ user.email }}</p>
+
+                {% if user.must_change_password %}
+                  <span>パスワード未変更</span>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
+                <a href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
+                <form action="{{ url_for('admin.user_activate', user_id=user.id) }}" method="POST">
+                    {{ action_form.hidden_tag() }}
+                    <button type="submit">有効にする</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+    {% else %}
+        <p>該当するユーザーがいません</p>
+    {% endif %}
+  </div>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}ユーザー編集{% endblock %}
+
+{% block content %} 
+  <h2>ユーザー編集</h2>
+    
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div>
+      {{ form.name.label }}
+      {{ form.name }}
+
+      {% for error in form.name.errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.department.label }}
+      {{ form.department }}
+
+      {% for error in form.department.errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.email.label }}
+      {{ form.email }}
+
+      {% for error in form.email.errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.submit() }}
+    </div>
+  </form>
+
+  <a href="{{ url_for('admin.user_list') }}">ユーザー一覧へ戻る</a>
+{% endblock %}

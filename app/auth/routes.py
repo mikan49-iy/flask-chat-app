@@ -1,9 +1,10 @@
 from flask import flash, redirect, render_template, url_for
-from flask_login import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash
+from flask_login import login_required, login_user, logout_user, current_user
+from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy.exc import SQLAlchemyError
 
 from . import auth_bp
-from .forms import LoginForm
+from .forms import LoginForm, PasswordChangeForm
 from ..extensions import db
 from ..models import User
 
@@ -41,6 +42,9 @@ def login():
 
         login_user(user)
 
+        if user.must_change_password:
+            return redirect(url_for('auth.password_change'))
+        
         return redirect(url_for('index'))
 
     return render_template(
@@ -53,3 +57,48 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('auth.login'))
+
+@auth_bp.route("/password/change", methods=['GET', 'POST'])
+@login_required
+def password_change():
+    form = PasswordChangeForm()
+
+    if form.validate_on_submit():
+        current_password = form.password.data
+
+        if not check_password_hash(
+            current_user.password_hash,
+            current_password,
+        ):
+
+            flash(
+                '現在のパスワードが正しくありません'
+            )
+            return render_template(
+                'auth/password_change.html',
+                form=form,
+            )
+        
+        current_user.password_hash = generate_password_hash(
+                form.new_password.data
+            )
+        
+        current_user.must_change_password=False
+
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash('パスワードの変更に失敗しました')
+            return render_template(
+                'auth/password_change.html',
+                form=form,
+            )
+        flash('パスワードを変更しました')
+        
+        return redirect(url_for('index'))
+
+    return render_template(
+        'auth/password_change.html',
+        form=form,
+    )

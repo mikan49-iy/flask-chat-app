@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}チャット一覧{% endblock %}
+
+{% block content %}
+  <h2>チャット一覧</h2>
+
+  {% if chat_items %}
+  {% for item in chat_items %}
+    <div>
+      <p>{{ item.other_user.name }}</p>
+
+      {% if item.other_user.department %}
+        <p>{{ item.other_user.department }}</p>
+      {% endif %}
+
+      {% if item.latest_message %}
+        <p>{{ item.latest_message.text }}</p>
+        <p>{{ item.latest_message.created_at }}</p>
+      {% else %}
+        <p>まだメッセージはありません。</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <p>チャットはまだありません。</p>
+{% endif %}
+{% endblock %}

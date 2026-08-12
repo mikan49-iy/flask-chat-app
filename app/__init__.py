@@ -34,9 +34,11 @@ def create_app():
 
     from .auth import auth_bp
     from .admin import admin_bp
+    from .chat import chat_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(chat_bp)
 
     @app.before_request
     def require_password_change():

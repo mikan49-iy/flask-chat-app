@@ -5,8 +5,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from . import chat_bp
 from ..decorators import user_required
 from ..extensions import db
-from ..models import Conversation, ConversationMember, Message
+from ..models import  User, Conversation, ConversationMember, Message
 from .forms import MessageForm
+from ..forms import ActionForm
 
 @chat_bp.route("/chats", methods=["GET"])
 @login_required
@@ -133,4 +134,99 @@ def chat_room(conversation_id):
         messages=messages,
         other_user=other_user,
         form = form,
+    )
+
+@chat_bp.route("/chats/users", methods=["GET"])
+@login_required
+@user_required
+def user_list():
+    users = db.session.execute(
+        db.select(User)
+        .where(
+            User.role == 'user',
+            User.is_active.is_(True),
+            User.id != current_user.id,
+        )
+        .order_by(User.name)
+    ).scalars().all()
+
+    action_form = ActionForm()
+
+    return render_template(
+        'chat/user_list.html',
+        users=users,
+        action_form=action_form,
+    )
+
+@chat_bp.route("/chats/users/<int:user_id>/start", methods=["POST"])
+@login_required
+@user_required
+def chat_start(user_id):
+    user = db.session.get(User, user_id)
+
+    if user is None:
+        abort(404)
+
+    if user.role != 'user':
+        abort(404)
+
+    if not user.is_active:
+        abort(404)
+    
+    if user.id == current_user.id:
+        abort(404)
+
+    my_memberships = db.session.execute(
+        db.select(ConversationMember).where(
+            ConversationMember.user_id == current_user.id
+        )
+    ).scalars().all()
+
+    for membership in my_memberships:
+        conversation = membership.conversation
+
+        for member in conversation.members:
+            if member.user_id == user_id:
+                return redirect(
+                    url_for(
+                    'chat.chat_room',
+                    conversation_id=conversation.id,
+                    )
+                )
+
+    conversation = Conversation()
+
+    try:
+        db.session.add(conversation)
+        db.session.flush()
+
+        current_user_member = ConversationMember(
+            conversation_id=conversation.id,
+            user_id=current_user.id,
+        )
+
+        other_user_member = ConversationMember(
+            conversation_id=conversation.id,
+            user_id=user.id,
+        )
+    
+        db.session.add_all(
+            [
+                current_user_member,
+                other_user_member,
+            ]
+        )
+
+        db.session.commit()
+
+    except SQLAlchemyError:
+        db.session.rollback()
+        flash('チャット画面の作成に失敗しました')
+        return redirect(url_for("chat.user_list"))
+    
+    return redirect(
+        url_for(
+            'chat.chat_room',
+            conversation_id=conversation.id,
+        )
     )

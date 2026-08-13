@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ other_user.name }}さんとのチャット{% endblock %}
+
+{% block content %}
+  <a href="{{ url_for('chat.chat_list') }}">チャット一覧へ戻る</a>
+  
+  <h2>{{ other_user.name }}</h2>
+
+  {% if other_user.department %}
+    <p>{{ other_user.department }}</p>
+  {% endif %}
+
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.sender_id == current_user.id %}
+        <div class="message message-own">
+          <p>{{ message.text }}</p>
+          <p>{{ message.created_at }}</p>
+        </div>
+      {% else %}
+        <div class="message message-other">
+          <p>{{ message.text }}</p>
+          <p>{{ message.created_at }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+  <p>メッセージがありません。</p>
+  {% endif %}
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    {{ form.message }}
+
+    {{ form.submit() }}
+  </form>
+{% endblock %}

@@ -7,7 +7,8 @@ from . import admin_bp
 from ..decorators import admin_required
 from ..extensions import db
 from ..models import User
-from .forms import UserCreateForm, UserEditForm, ActionForm, TemporaryPasswordForm
+from .forms import UserCreateForm, UserEditForm, TemporaryPasswordForm
+from ..forms import ActionForm
 
 @admin_bp.route("/users", methods=['GET'])
 @login_required

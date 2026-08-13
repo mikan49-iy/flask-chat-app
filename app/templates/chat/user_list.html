@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}チャットの相手を探す{% endblock %}
+
+{% block content %} 
+  <h2>チャットの相手を探す</h2>
+  <div>
+    {% if users %}
+      {% for user in users %}
+      <div>
+        <p>{{ user.name }}</p>
+
+        {% if user.department %}
+          <p>{{ user.department }}</p>
+        {% endif %}
+
+        <form action="{{ url_for('chat.chat_start', user_id=user.id) }}" method="POST">
+          {{ action_form.hidden_tag() }}
+          <button type="submit">チャットを開始</button>
+        </form>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <p>該当するユーザーがいません</p>
+    {% endif %}
+  </div>
+
+{% endblock %}

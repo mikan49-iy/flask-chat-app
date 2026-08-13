@@ -91,10 +91,7 @@ class UserEditForm(FlaskForm):
     )
     
     submit = SubmitField('更新')
-
-class ActionForm(FlaskForm):
-    pass
-
+    
 class TemporaryPasswordForm(FlaskForm):
 
     password = PasswordField(

@@ -43,11 +43,22 @@ def chat_list():
             .limit(1)
         ).scalar_one_or_none()
 
+        unread = False
+
+        if latest_message is not None:
+
+            if (
+                latest_message.sender_id != current_user.id
+                and membership.last_read_message_id != latest_message.id
+            ):
+                unread = True
+
         chat_items.append(
             {
                 "conversation": conversation,
                 "other_user": other_member.user,
                 "latest_message": latest_message,
+                "unread": unread
             }
         )
 
@@ -102,7 +113,26 @@ def chat_room(conversation_id):
                 Message.conversation_id == conversation.id
             ).order_by(Message.created_at.asc())
         ).scalars().all()
+    
+    conversation_member = None
 
+    for member in conversation.members:
+        if member.user_id == current_user.id:
+            conversation_member = member
+            break
+
+    if conversation_member is None:
+        abort(404)
+
+    if messages:
+        latest_message = messages[-1]
+        conversation_member.last_read_message_id = latest_message.id
+
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+    
     form = MessageForm()
 
     if form.validate_on_submit():

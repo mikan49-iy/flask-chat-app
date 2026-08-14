@@ -1,10 +1,10 @@
 import os
 
-from flask import Flask, redirect, request, url_for
+from flask import Flask, redirect, request, url_for, abort
 from flask_login import current_user
 
 from .extensions import db, migrate, login_manager
-
+from .forms import ActionForm
 
 def create_app():
     app = Flask(__name__)
@@ -61,9 +61,28 @@ def create_app():
             return redirect(url_for("auth.password_change"))
 
         return None
+    
+    @app.context_processor
+    def inject_action_form():
+        return {
+            "action_form": ActionForm(),
+        }
 
     @app.route("/")
     def index():
-        return "Hello, Chat App!"
+
+        if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
+    
+        if current_user.must_change_password:
+            return redirect(url_for('auth.password_change'))
+        
+        if current_user.role == 'admin':
+            return redirect(url_for('admin.user_list'))
+        
+        if current_user.role == 'user':
+            return redirect(url_for('chat.chat_list'))
+
+        abort(403)  
 
     return app

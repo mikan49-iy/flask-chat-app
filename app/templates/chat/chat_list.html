@@ -20,6 +20,8 @@
       {% else %}
         <p>まだメッセージはありません。</p>
       {% endif %}
+
+      <a href="{{ url_for('chat.chat_room', conversation_id=item.conversation.id) }}">チャットを開く</a>
     </div>
   {% endfor %}
 {% else %}

@@ -7,6 +7,42 @@
   </head>
 
   <body>
+    <nav>
+      <div>
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == "admin" %}
+            <a href="{{ url_for('admin.user_list') }}">チャットアプリ</a>
+            <a href="{{ url_for('admin.user_list') }}">ユーザー一覧</a>
+            <a href="{{ url_for('admin.user_create') }}">新規ユーザー登録</a>
+            <form action="{{ url_for('auth.logout') }}" method="POST">
+              {{ action_form.hidden_tag() }}
+              <button type="submit">ログアウト</button>
+            </form>
+          {% elif current_user.role == "user" %}
+            {% if not current_user.must_change_password %}
+              <a href="{{ url_for('chat.chat_list') }}">チャットアプリ</a>
+              <a href="{{ url_for('chat.chat_list') }}">チャット一覧</a>
+              <a href="{{ url_for('chat.user_list') }}">相手を探す</a>
+              <a href="{{ url_for('auth.password_change') }}">パスワード変更</a>            
+              <form action="{{ url_for('auth.logout') }}" method="POST">
+                {{ action_form.hidden_tag() }}
+                <button type="submit">ログアウト</button>
+              </form>
+            {% else %}
+              <span>チャットアプリ</span>
+              <form action="{{ url_for('auth.logout') }}" method="POST">
+                {{ action_form.hidden_tag() }}
+                <button type="submit">ログアウト</button>
+              </form>
+            {% endif %}
+
+          {% endif %}
+        {% else %}
+          <span>チャットアプリ</span>
+        {% endif %}
+      </div>
+    </nav>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div>

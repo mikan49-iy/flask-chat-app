@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for, abort
 from flask_login import login_required, login_user, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.exc import SQLAlchemyError
@@ -45,7 +45,14 @@ def login():
         if user.must_change_password:
             return redirect(url_for('auth.password_change'))
         
-        return redirect(url_for('index'))
+        if user.role == 'admin':
+            return redirect(url_for('admin.user_list'))
+        
+        if user.role == 'user':
+            return redirect(url_for('chat.chat_list'))
+
+        logout_user()
+        abort(403)
 
     return render_template(
         'auth/login.html',
@@ -96,7 +103,7 @@ def password_change():
             )
         flash('パスワードを変更しました')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('chat.chat_list'))
 
     return render_template(
         'auth/password_change.html',

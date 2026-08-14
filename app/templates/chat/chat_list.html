@@ -17,6 +17,9 @@
       {% if item.latest_message %}
         <p>{{ item.latest_message.text }}</p>
         <p>{{ item.latest_message.created_at }}</p>
+          {% if item.unread %}
+            <span>未読あり</span>
+          {% endif %}
       {% else %}
         <p>まだメッセージはありません。</p>
       {% endif %}

@@ -32,13 +32,10 @@ def user_list():
         .order_by(User.name)
     ).scalars().all()
 
-    action_form = ActionForm()
-
     return render_template(
         'admin/user_list.html',
         active_users=active_users,
         inactive_users=inactive_users,
-        action_form=action_form,
     )
 
 @admin_bp.route("/users/new", methods=['GET', 'POST'])

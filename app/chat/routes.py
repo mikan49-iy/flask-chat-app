@@ -150,12 +150,9 @@ def user_list():
         .order_by(User.name)
     ).scalars().all()
 
-    action_form = ActionForm()
-
     return render_template(
         'chat/user_list.html',
         users=users,
-        action_form=action_form,
     )
 
 @chat_bp.route("/chats/users/<int:user_id>/start", methods=["POST"])

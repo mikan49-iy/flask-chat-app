@@ -11,29 +11,18 @@
     <p>{{ other_user.department }}</p>
   {% endif %}
 
-  {% if messages %}
-    {% for message in messages %}
-      {% if message.sender_id == current_user.id %}
-        <div class="message message-own">
-          <p>{{ message.text }}</p>
-          <p>{{ message.created_at }}</p>
-        </div>
-      {% else %}
-        <div class="message message-other">
-          <p>{{ message.text }}</p>
-          <p>{{ message.created_at }}</p>
-        </div>
-      {% endif %}
-    {% endfor %}
-  {% else %}
-  <p>メッセージがありません。</p>
-  {% endif %}
+  <div id="message-list" data-conversation-id="{{ conversation.id }}" data-current-user-id="{{ current_user.id }}"></div>
 
-  <form method="POST">
+  <form id="message-form" method="POST">
     {{ form.hidden_tag() }}
 
     {{ form.message }}
 
     {{ form.submit() }}
   </form>
+  <p id="message-error"></p>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 {% endblock %}

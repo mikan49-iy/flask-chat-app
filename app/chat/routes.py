@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, abort
+from flask import render_template, flash, redirect, url_for, abort, jsonify, request
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -7,7 +7,6 @@ from ..decorators import user_required
 from ..extensions import db
 from ..models import  User, Conversation, ConversationMember, Message
 from .forms import MessageForm
-from ..forms import ActionForm
 
 @chat_bp.route("/chats", methods=["GET"])
 @login_required
@@ -39,7 +38,7 @@ def chat_list():
             .where(
                 Message.conversation_id == conversation.id
             )
-            .order_by(Message.created_at.desc())
+            .order_by(Message.created_at.desc(), Message.id.desc())
             .limit(1)
         ).scalar_one_or_none()
 
@@ -78,7 +77,7 @@ def chat_list():
         chat_items=chat_items,
     )
 
-@chat_bp.route("/chats/<int:conversation_id>", methods=["GET", "POST"])
+@chat_bp.route("/chats/<int:conversation_id>", methods=["GET"])
 @login_required
 @user_required
 def chat_room(conversation_id):
@@ -88,14 +87,14 @@ def chat_room(conversation_id):
     if conversation is None:
         abort(404)
 
-    is_member = False
-    
+    conversation_member = None
+
     for member in conversation.members:
         if member.user_id == current_user.id:
-            is_member = True
+            conversation_member = member
             break
 
-    if not is_member:
+    if conversation_member is None:
         abort(404)
 
     other_user = None
@@ -113,16 +112,6 @@ def chat_room(conversation_id):
                 Message.conversation_id == conversation.id
             ).order_by(Message.created_at.asc())
         ).scalars().all()
-    
-    conversation_member = None
-
-    for member in conversation.members:
-        if member.user_id == current_user.id:
-            conversation_member = member
-            break
-
-    if conversation_member is None:
-        abort(404)
 
     if messages:
         latest_message = messages[-1]
@@ -135,35 +124,12 @@ def chat_room(conversation_id):
     
     form = MessageForm()
 
-    if form.validate_on_submit():
-        message = Message(
-            conversation_id = conversation.id,
-            sender_id = current_user.id,
-            text = form.message.data,
-        )
-
-        try:
-            db.session.add(message)
-            db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            flash('メッセージの送信に失敗しました')
-            return render_template(
-                'chat/chat_room.html',
-                conversation=conversation,
-                messages=messages,
-                other_user=other_user,
-                form=form,
-            )
-        
-        return redirect(url_for('chat.chat_room',conversation_id=conversation.id))
-
     return render_template(
         'chat/chat_room.html',
         conversation=conversation,
         messages=messages,
         other_user=other_user,
-        form = form,
+        form=form,
     )
 
 @chat_bp.route("/chats/users", methods=["GET"])
@@ -257,3 +223,155 @@ def chat_start(user_id):
             conversation_id=conversation.id,
         )
     )
+
+@chat_bp.route("/chats/<int:conversation_id>/messages", methods=["GET"])
+@login_required
+@user_required
+def get_messages(conversation_id):
+    conversation = db.session.get(Conversation, conversation_id)
+
+    if conversation is None:
+        abort(404)
+
+    is_member = False
+    
+    for member in conversation.members:
+        if member.user_id == current_user.id:
+            is_member = True
+            break
+
+    if not is_member:
+        abort(404)
+
+    messages = db.session.execute(
+            db.select(Message).where(
+                Message.conversation_id == conversation.id
+            ).order_by(Message.created_at.asc(), Message.id.asc())
+        ).scalars().all()
+    
+    message_data = []
+    
+    for message in messages:
+        message_data.append(
+            {
+                "id": message.id,
+                "text": message.text,
+                "sender_id": message.sender_id,
+                "created_at": message.created_at.isoformat(),
+            }            
+        )
+
+    return jsonify(message_data)
+
+@chat_bp.route("/chats/<int:conversation_id>/messages", methods=["POST"])
+@login_required
+@user_required
+def send_message(conversation_id):
+    conversation = db.session.get(Conversation, conversation_id)
+
+    if conversation is None:
+        abort(404)
+
+    is_member = False
+    
+    for member in conversation.members:
+        if member.user_id == current_user.id:
+            is_member = True
+            break
+
+    if not is_member:
+        abort(404)
+
+    form = MessageForm()
+
+    if not form.validate_on_submit():
+        return jsonify(
+            {
+                "errors": form.errors,
+            }
+        ), 400
+    
+    message = Message(
+        conversation_id=conversation.id,
+        sender_id=current_user.id,
+        text=form.message.data,
+    )
+
+    try:
+        db.session.add(message)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(
+            {
+                "error": "メッセージの送信に失敗しました。"
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "id": message.id,
+            "text": message.text,
+            "sender_id": message.sender_id,
+            "created_at": message.created_at.isoformat(),
+        }
+    ), 201
+
+@chat_bp.route("/chats/<int:conversation_id>/read", methods=["POST"])
+@login_required
+@user_required
+def mark_as_read(conversation_id):
+    conversation = db.session.get(Conversation, conversation_id)
+
+    if conversation is None:
+        abort(404)
+
+    conversation_member = None
+
+    for member in conversation.members:
+        if member.user_id == current_user.id:
+            conversation_member = member
+            break
+
+    if conversation_member is None:
+        abort(404)
+
+    data = request.get_json(silent=True)
+
+    if data is None:
+        abort(400)
+
+    last_read_message_id = data.get("last_read_message_id")
+
+    if last_read_message_id is None:
+        abort(400)
+
+    message = db.session.get(Message, last_read_message_id)
+
+    if message is None:
+        abort(400)
+
+    if message.conversation_id != conversation.id:
+        abort(400)
+
+    if (
+        conversation_member.last_read_message_id is None
+        or message.id > conversation_member.last_read_message_id
+    ):
+        conversation_member.last_read_message_id = message.id
+
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return jsonify(
+            {
+                "error": "既読情報の更新に失敗しました。"
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "last_read_message_id": message.id,
+        }
+    ), 200

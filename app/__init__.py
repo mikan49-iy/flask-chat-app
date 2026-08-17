@@ -3,7 +3,7 @@ import os
 from flask import Flask, redirect, request, url_for, abort
 from flask_login import current_user
 
-from .extensions import db, migrate, login_manager
+from .extensions import db, migrate, login_manager, csrf
 from .forms import ActionForm
 
 def create_app():
@@ -25,6 +25,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     from . import models
     from . import login_config

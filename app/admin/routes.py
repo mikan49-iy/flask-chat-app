@@ -58,7 +58,7 @@ def user_create():
         ).scalar_one_or_none()
             
         if existing_user:
-            flash("このメールアドレスは既に使用されています")
+            flash('このメールアドレスは既に使用されています', 'danger')
             return render_template(
                 "admin/user_create.html",
                 form=form,
@@ -78,12 +78,12 @@ def user_create():
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('ユーザーの登録に失敗しました')
+            flash('ユーザーの登録に失敗しました', 'danger')
             return render_template(
                 'admin/user_create.html',
                 form=form,
             )
-        flash('ユーザーを登録しました')
+        flash('ユーザーを登録しました','success')
         return redirect(url_for('admin.user_list'))
 
     return render_template(
@@ -123,7 +123,7 @@ def user_edit(user_id):
         ).scalar_one_or_none()
             
         if existing_user:
-            flash("このメールアドレスは既に使用されています")
+            flash('このメールアドレスは既に使用されています', 'danger')
             return render_template(
                 "admin/user_edit.html",
                 form=form,
@@ -137,12 +137,12 @@ def user_edit(user_id):
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('ユーザー情報の編集に失敗しました')
+            flash('ユーザー情報の編集に失敗しました', 'danger')
             return render_template(
                 'admin/user_edit.html',
                 form=form,
             )
-        flash('ユーザー情報を編集しました')
+        flash('ユーザー情報を編集しました', 'success')
         return redirect(url_for('admin.user_list'))
     
     return render_template(
@@ -173,10 +173,10 @@ def user_deactivate(user_id):
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        flash('ユーザーの無効化に失敗しました')
+        flash('ユーザーの無効化に失敗しました', 'danger')
         return redirect(url_for('admin.user_list'))
     
-    flash("ユーザーを無効化しました。")
+    flash('ユーザーを無効化しました', 'success')
     return redirect(url_for('admin.user_list'))
 
 @admin_bp.route("/users/<int:user_id>/activate", methods=['POST'])
@@ -202,10 +202,10 @@ def user_activate(user_id):
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        flash('ユーザーの有効化に失敗しました')
+        flash('ユーザーの有効化に失敗しました', 'danger')
         return redirect(url_for('admin.user_list'))
     
-    flash("ユーザーを有効化しました。")
+    flash('ユーザーを有効化しました', 'success')
     return redirect(url_for('admin.user_list'))
 
 @admin_bp.route("/users/<int:user_id>/temporary-password", methods=['GET','POST'])
@@ -234,14 +234,14 @@ def temporary_password_set(user_id):
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('一時パスワードの設定に失敗しました')
+            flash('一時パスワードの設定に失敗しました', 'danger')
             return redirect(
                 url_for(
                     'admin.temporary_password_set',
                     user_id=user.id,
                 )
             )
-        flash('一時パスワードを設定しました')
+        flash('一時パスワードを設定しました', 'success')
         return redirect(url_for('admin.user_list'))
 
     return render_template(

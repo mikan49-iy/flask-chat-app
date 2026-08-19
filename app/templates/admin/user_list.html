@@ -3,75 +3,88 @@
 {% block title %}ユーザー一覧{% endblock %}
 
 {% block content %} 
-  <h2>ユーザー一覧</h2>
-  <a href="{{ url_for('admin.user_create') }}">新規ユーザー登録</a>
-  <div>
-    <h3>有効ユーザー</h3>
-    {% if active_users %}
-        {% for user in active_users %}
-        <div>
-            <div>
-                <p>{{ user.name }}</p>
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
 
-                {% if user.department %}
-                  <p>{{ user.department }}</p>
-                {% endif %}
-
-                <p>{{ user.email }}</p>
-
-                {% if user.must_change_password %}
-                  <span>パスワード未変更</span>
-                {% endif %}
-            </div>
-            <div>
-                <a href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
-                <a href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
-                <form action="{{ url_for('admin.user_deactivate', user_id=user.id) }}" method="POST">
-                    {{ action_form.hidden_tag() }}
-                    <button type="submit">無効にする</button>
-                </form>
-            </div>
+        <h2>ユーザー一覧</h2>
+        <div class="text-end mb-3">
+          <a class="btn btn-chat" href="{{ url_for('admin.user_create') }}">新規ユーザー登録</a>
         </div>
-        {% endfor %}
-
-    {% else %}
-        <p>該当するユーザーがいません</p>
-    {% endif %}
-  </div>
-
-  <div>
-    <h3>無効ユーザー</h3>
-    {% if inactive_users %}
-        {% for user in inactive_users %}
         <div>
-            <div>
-                <p>{{ user.name }}</p>
-                <span>無効</span>
+          <h3>有効ユーザー</h3>
+          {% if active_users %}
+            {% for user in active_users %}
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div>
+                    <h5 class="card-title">{{ user.name }}</h5>
 
-                {% if user.department %}
-                  <p>{{ user.department }}</p>
-                {% endif %}
+                    {% if user.department %}
+                      <p class="card-subtitle text-body-secondary">{{ user.department }}</p>
+                    {% endif %}
 
-                <p>{{ user.email }}</p>
+                    <p class="mb-1">{{ user.email }}</p>
 
-                {% if user.must_change_password %}
-                  <span>パスワード未変更</span>
-                {% endif %}
-            </div>
-            <div>
-                <a href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
-                <a href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
-                <form action="{{ url_for('admin.user_activate', user_id=user.id) }}" method="POST">
-                    {{ action_form.hidden_tag() }}
-                    <button type="submit">有効にする</button>
-                </form>
-            </div>
+                    {% if user.must_change_password %}
+                      <span class="badge rounded-pill text-bg-warning mb-1">パスワード未変更</span>
+                    {% endif %}
+                  </div>
+                  <div class="d-flex flex-wrap justify-content-end gap-1 mt-2">
+                    <a class="btn btn-outline-secondary" href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
+                    <a class="btn btn-outline-warning" href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
+                    <form action="{{ url_for('admin.user_deactivate', user_id=user.id) }}" method="POST">
+                      {{ action_form.hidden_tag() }}
+                      <button class="btn btn-outline-danger" type="submit">無効にする</button>
+                    </form>
+                  </div>
+                </div>
+              </div> 
+            {% endfor %}
+
+          {% else %}
+            <p>該当するユーザーがいません</p>
+          {% endif %}
         </div>
-        {% endfor %}
 
-    {% else %}
-        <p>該当するユーザーがいません</p>
-    {% endif %}
+        <div class="mt-4">
+          <h3>無効ユーザー</h3>
+          {% if inactive_users %}
+            {% for user in inactive_users %}
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div>
+                    <div class="d-flex align-items-center gap-2">
+                      <h5 class="card-title mb-0">{{ user.name }}</h5>
+                      <span class="badge rounded-pill text-bg-secondary">無効</span>
+                    </div>
+                    {% if user.department %}
+                      <p class="card-subtitle mt-2 text-body-secondary">{{ user.department }}</p>
+                    {% endif %}
+
+                    <p class="mb-1">{{ user.email }}</p>
+
+                    {% if user.must_change_password %}
+                      <span class="badge rounded-pill text-bg-warning">パスワード未変更</span>
+                    {% endif %}
+                  </div>
+                  <div class="d-flex flex-wrap justify-content-end gap-1 mt-2">
+                    <a class="btn btn-outline-secondary" href="{{ url_for('admin.user_edit', user_id=user.id) }}">編集</a>
+                    <a class="btn btn-outline-warning" href="{{ url_for('admin.temporary_password_set', user_id=user.id) }}">一時パスワード設定</a>
+                    <form action="{{ url_for('admin.user_activate', user_id=user.id) }}" method="POST">
+                      {{ action_form.hidden_tag() }}
+                      <button class="btn btn-outline-success" type="submit">有効にする</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+
+          {% else %}
+            <p>該当するユーザーがいません</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
-
 {% endblock %}

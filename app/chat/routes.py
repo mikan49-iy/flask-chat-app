@@ -6,6 +6,7 @@ from . import chat_bp
 from ..decorators import user_required
 from ..extensions import db
 from ..models import  User, Conversation, ConversationMember, Message
+from ..utils import to_jst
 from .forms import MessageForm
 
 @chat_bp.route("/chats", methods=["GET"])
@@ -42,6 +43,14 @@ def chat_list():
             .limit(1)
         ).scalar_one_or_none()
 
+        latest_message_created_at_jst = None
+
+        if latest_message is not None:
+            latest_message_created_at_jst = (
+                to_jst(latest_message.created_at)
+                .strftime("%Y/%m/%d %H:%M")
+            )
+
         unread = False
 
         if latest_message is not None:
@@ -57,6 +66,7 @@ def chat_list():
                 "conversation": conversation,
                 "other_user": other_member.user,
                 "latest_message": latest_message,
+                "latest_message_created_at_jst": latest_message_created_at_jst,
                 "unread": unread
             }
         )
@@ -214,7 +224,7 @@ def chat_start(user_id):
 
     except SQLAlchemyError:
         db.session.rollback()
-        flash('チャット画面の作成に失敗しました')
+        flash('チャット画面の作成に失敗しました', 'danger')
         return redirect(url_for("chat.user_list"))
     
     return redirect(
@@ -257,7 +267,7 @@ def get_messages(conversation_id):
                 "id": message.id,
                 "text": message.text,
                 "sender_id": message.sender_id,
-                "created_at": message.created_at.isoformat(),
+                "created_at": to_jst(message.created_at).strftime("%Y/%m/%d %H:%M"),
             }            
         )
 

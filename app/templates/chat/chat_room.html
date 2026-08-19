@@ -3,24 +3,36 @@
 {% block title %}{{ other_user.name }}さんとのチャット{% endblock %}
 
 {% block content %}
-  <a href="{{ url_for('chat.chat_list') }}">チャット一覧へ戻る</a>
-  
-  <h2>{{ other_user.name }}</h2>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+        <div class="chat-layout">
+          <div class="chat-header">
+            <a class="btn btn-outline-secondary mt-3" href="{{ url_for('chat.chat_list') }}">チャット一覧へ戻る</a>
+            
+            <h2 class="text-center mb-1">{{ other_user.name }}</h2>
 
-  {% if other_user.department %}
-    <p>{{ other_user.department }}</p>
-  {% endif %}
+            {% if other_user.department %}
+              <p class="text-center text-body-secondary mb-3">{{ other_user.department }}</p>
+            {% endif %}
+          </div>
 
-  <div id="message-list" data-conversation-id="{{ conversation.id }}" data-current-user-id="{{ current_user.id }}"></div>
+          <div id="message-list" data-conversation-id="{{ conversation.id }}" data-current-user-id="{{ current_user.id }}"></div>
+          <div class="chat-input-area">
+            <form id="message-form" method="POST" class="d-flex gap-2 align-items-end">
+              {{ form.hidden_tag() }}
 
-  <form id="message-form" method="POST">
-    {{ form.hidden_tag() }}
-
-    {{ form.message }}
-
-    {{ form.submit() }}
-  </form>
-  <p id="message-error"></p>
+              <div class="flex-grow-1">
+                {{ form.message(class="form-control") }}
+              </div>
+              {{ form.submit(class="btn btn-chat") }}
+            </form>
+            <p id="message-error" class="text-danger mt-2 mb-0"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}

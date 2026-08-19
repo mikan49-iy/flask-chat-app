@@ -35,7 +35,7 @@ class UserCreateForm(FlaskForm):
         ],
     )
     password = PasswordField(
-        '初期パスワード',
+        '一時パスワード',
         validators=[
             DataRequired('パスワードは必須です'),
             Length(
@@ -46,7 +46,7 @@ class UserCreateForm(FlaskForm):
         ],
     )
     password_confirm = PasswordField(
-        '初期パスワード（確認）',
+        '一時パスワード（確認）',
         validators=[
             DataRequired('確認用パスワードは必須です'),
             EqualTo('password',

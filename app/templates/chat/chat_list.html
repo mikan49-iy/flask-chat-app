@@ -3,31 +3,43 @@
 {% block title %}チャット一覧{% endblock %}
 
 {% block content %}
-  <h2>チャット一覧</h2>
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+        <h2>チャット一覧</h2>
 
-  {% if chat_items %}
-  {% for item in chat_items %}
-    <div>
-      <p>{{ item.other_user.name }}</p>
+        {% if chat_items %}
+        {% for item in chat_items %}
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.other_user.name }}</h5>
 
-      {% if item.other_user.department %}
-        <p>{{ item.other_user.department }}</p>
-      {% endif %}
+              {% if item.other_user.department %}
+                <h6 class="card-subtitle mb-2 text-body-secondary">{{ item.other_user.department }}</h6>
+              {% endif %}
 
-      {% if item.latest_message %}
-        <p>{{ item.latest_message.text }}</p>
-        <p>{{ item.latest_message.created_at }}</p>
-          {% if item.unread %}
-            <span>未読あり</span>
-          {% endif %}
+              {% if item.latest_message %}
+                <p>
+                  {{ item.latest_message.text[:50] }}
+                  {% if item.latest_message.text|length > 50 %}…{% endif %}
+                </p>
+                <p class="text-end">{{ item.latest_message_created_at_jst }}</p>
+              {% else %}
+                <p>まだメッセージはありません。</p>
+              {% endif %}
+              <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                {% if item.unread %}
+                  <span class="badge rounded-pill text-bg-warning">未読あり</span>
+                {% endif %}
+                <a class="btn btn-chat" href="{{ url_for('chat.chat_room', conversation_id=item.conversation.id) }}">チャットを開く</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
       {% else %}
-        <p>まだメッセージはありません。</p>
+        <p>チャットはまだありません。</p>
       {% endif %}
-
-      <a href="{{ url_for('chat.chat_room', conversation_id=item.conversation.id) }}">チャットを開く</a>
+      </div>
     </div>
-  {% endfor %}
-{% else %}
-  <p>チャットはまだありません。</p>
-{% endif %}
+  </div>
 {% endblock %}

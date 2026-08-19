@@ -26,7 +26,8 @@ def login():
         ):
 
             flash(
-                'メールアドレスまたはパスワードが正しくありません'
+                'メールアドレスまたはパスワードが正しくありません',
+                'danger'
             )
             return render_template(
                 'auth/login.html',
@@ -34,7 +35,8 @@ def login():
             )
         
         if not user.is_active:
-            flash('このアカウントは現在使用できません')
+            flash('このアカウントは現在使用できません',
+                  'danger')
             return render_template(
                 'auth/login.html',
                 form=form,
@@ -79,7 +81,8 @@ def password_change():
         ):
 
             flash(
-                '現在のパスワードが正しくありません'
+                '現在のパスワードが正しくありません',
+                'danger'
             )
             return render_template(
                 'auth/password_change.html',
@@ -96,12 +99,13 @@ def password_change():
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
-            flash('パスワードの変更に失敗しました')
+            flash('パスワードの変更に失敗しました',
+                  'danger')
             return render_template(
                 'auth/password_change.html',
                 form=form,
             )
-        flash('パスワードを変更しました')
+        flash('パスワードを変更しました', 'success')
         
         return redirect(url_for('chat.chat_list'))
 

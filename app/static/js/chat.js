@@ -32,15 +32,17 @@ async function fetchMessages() {
             const messageDiv = document.createElement("div");
 
             if (message.sender_id === currentUserId) {
-                messageDiv.classList.add("message", "message-own");
+                messageDiv.classList.add("message", "message-own", "ms-auto", "p-3", "mb-3", "rounded");
             } else {
-                messageDiv.classList.add("message", "message-other");
+                messageDiv.classList.add("message", "message-other", "me-auto", "p-3", "mb-3", "rounded");
             }
 
             const textP = document.createElement("p");
+            textP.classList.add("message-text", "mb-1");
             textP.textContent = message.text;
 
             const timeP = document.createElement("p");
+            timeP.classList.add("small", "text-body-secondary", "mb-0","text-end");
             timeP.textContent = message.created_at;
 
             messageDiv.appendChild(textP);

@@ -20,20 +20,17 @@ body {
     flex-direction: column;
 }
 
-.message-text {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+.chat-input-area {
+    flex-shrink: 0;
+    background-color: #F8FBF9;
+    border-top: 1px solid #D8E4DE;
+    margin-bottom: 0;
+    padding: 1rem;
 }
 
 .message {
     width: fit-content;
     max-width: 70%;
-}
-
-#message-list {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
 }
 
 .message-own {
@@ -44,12 +41,15 @@ body {
     background-color: #FFFFFF;
 }
 
-.chat-input-area {
-    flex-shrink: 0;
-    background-color: #F8FBF9;
-    border-top: 1px solid #D8E4DE;
-    margin-bottom: 0;
-    padding: 1rem;
+.message-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+#message-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .btn-form-submit {

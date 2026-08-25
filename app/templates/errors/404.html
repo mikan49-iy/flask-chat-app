@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}ページが見つかりません{% endblock %}
+
+{% block content %}
+  <div class="container mt-5 text-center">
+    <h1>404</h1>
+    <h2 class="mb-3">ページが見つかりませんでした</h2>
+    <p class="text-body-secondary">
+      URLをご確認ください。
+    </p>
+
+    <a class="btn btn-chat" href="{{ url_for('index') }}">
+      ホームへ戻る
+    </a>
+  </div>
+{% endblock %}

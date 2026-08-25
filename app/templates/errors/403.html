@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}権限がありません{% endblock %}
+
+{% block content %}
+  <div class="container mt-5 text-center">
+    <h1>403</h1>
+    <h2 class="mb-3">このページを表示する権限がありません</h2>
+    <p class="text-body-secondary">
+      このページへのアクセスは許可されていません。
+    </p>
+
+    <a class="btn btn-chat" href="{{ url_for('index') }}">
+      ホームへ戻る
+    </a>
+  </div>
+{% endblock %}

@@ -6,3 +6,4 @@ Flask-WTF
 email-validator
 PyMySQL[rsa]
 python-dotenv
+gunicorn

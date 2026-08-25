@@ -157,7 +157,7 @@ def user_deactivate(user_id):
     form = ActionForm()
 
     if not form.validate_on_submit():
-        abort(404)
+        abort(400)
 
     user = db.session.get(User, user_id)
 
@@ -186,7 +186,7 @@ def user_activate(user_id):
     form = ActionForm()
 
     if not form.validate_on_submit():
-        abort(404)
+        abort(400)
 
     user = db.session.get(User, user_id)
 

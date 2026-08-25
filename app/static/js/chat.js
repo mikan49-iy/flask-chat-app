@@ -2,9 +2,51 @@ const messageList = document.getElementById("message-list");
 const conversationId = messageList.dataset.conversationId;
 const currentUserId = Number(messageList.dataset.currentUserId);
 const messageForm = document.getElementById("message-form");
+const messageInput = document.getElementById("message");
+const messageCount = document.getElementById("message-count");
 const messageError = document.getElementById("message-error");
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
+function updateMessageCount() {
+    if (!messageInput || !messageCount) {
+        return;
+    }
+
+    const length = messageInput.value.length;
+
+    messageCount.textContent = `${length} / 500`;
+
+    messageCount.classList.remove(
+        "text-body-secondary",
+        "text-warning",
+        "text-danger"
+    );
+
+    if (length >= 500) {
+        messageCount.classList.add("text-danger");
+    } else if (length >= 450) {
+        messageCount.classList.add("text-warning");
+    } else {
+        messageCount.classList.add("text-body-secondary");
+    }
+}
+
+
+if (messageInput && messageCount) {
+    messageInput.addEventListener("input", function (event) {
+        if (event.isComposing) {
+            return;
+        }
+
+        updateMessageCount();
+    });
+
+    messageInput.addEventListener("compositionend", function () {
+        updateMessageCount();
+    });
+
+    updateMessageCount();
+}
 
 let lastMessageId = 0;
 
@@ -32,9 +74,23 @@ async function fetchMessages() {
             const messageDiv = document.createElement("div");
 
             if (message.sender_id === currentUserId) {
-                messageDiv.classList.add("message", "message-own", "ms-auto", "p-3", "mb-3", "rounded");
+                messageDiv.classList.add(
+                    "message",
+                    "message-own",
+                    "ms-auto",
+                    "p-3",
+                    "mb-3",
+                    "rounded"
+                );
             } else {
-                messageDiv.classList.add("message", "message-other", "me-auto", "p-3", "mb-3", "rounded");
+                messageDiv.classList.add(
+                    "message",
+                    "message-other",
+                    "me-auto",
+                    "p-3",
+                    "mb-3",
+                    "rounded"
+                );
             }
 
             const textP = document.createElement("p");
@@ -68,45 +124,48 @@ fetchMessages();
 
 setInterval(fetchMessages, 5000);
 
-messageForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
+if (messageForm) {
+    messageForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    const formData = new FormData(messageForm);
+        const formData = new FormData(messageForm);
 
-    try {
-        const response = await fetch(
-            `/chats/${conversationId}/messages`,
-            {
-                method: "POST",
-                body: formData,
+        try {
+            const response = await fetch(
+                `/chats/${conversationId}/messages`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(data);
+
+                if (data.errors && data.errors.message) {
+                    messageError.textContent = data.errors.message[0];
+                } else {
+                    messageError.textContent = "メッセージの送信に失敗しました。";
+                }
+
+                return;
             }
-        );
 
-        const data = await response.json();
+            messageError.textContent = "";
 
-        if (!response.ok) {
-            console.error(data);
+            messageForm.reset();
+            updateMessageCount();
+            await fetchMessages();
 
-            if (data.errors && data.errors.message) {
-                messageError.textContent = data.errors.message[0];
-            } else {
-                messageError.textContent = "メッセージの送信に失敗しました。";
-            }
-
-            return;
+        } catch (error) {
+            console.error(error);
+            messageError.textContent =
+                "通信に失敗しました。もう一度お試しください。";
         }
-
-        messageError.textContent = "";
-
-        messageForm.reset();
-        await fetchMessages();
-
-    } catch (error) {
-        console.error(error);
-        messageError.textContent =
-            "通信に失敗しました。もう一度お試しください。";
-    }
-});
+    });
+}
 
 async function markAsRead(lastReadMessageId) {
     try {

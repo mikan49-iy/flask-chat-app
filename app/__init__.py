@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, redirect, request, url_for, abort
+from flask import Flask, redirect, request, url_for, abort, render_template
 from flask_login import current_user
 
 from .extensions import db, migrate, login_manager, csrf
@@ -85,5 +85,18 @@ def create_app():
             return redirect(url_for('chat.chat_list'))
 
         abort(403)  
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        db.session.rollback()
+        return render_template("errors/500.html"), 500
 
     return app

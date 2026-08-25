@@ -131,13 +131,16 @@ def chat_room(conversation_id):
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
+            flash(
+                "既読情報の更新に失敗しました。",
+                "danger",
+            )
     
     form = MessageForm()
 
     return render_template(
         'chat/chat_room.html',
         conversation=conversation,
-        messages=messages,
         other_user=other_user,
         form=form,
     )
@@ -292,6 +295,23 @@ def send_message(conversation_id):
     if not is_member:
         abort(404)
 
+    other_user = None
+
+    for member in conversation.members:
+        if member.user_id != current_user.id:
+            other_user = member.user
+            break
+
+    if other_user is None:
+        abort(404)
+
+    if not other_user.is_active:
+        return jsonify(
+            {
+                "error": "このユーザーには現在メッセージを送信できません。"
+            }
+        ), 403
+
     form = MessageForm()
 
     if not form.validate_on_submit():
@@ -323,7 +343,7 @@ def send_message(conversation_id):
             "id": message.id,
             "text": message.text,
             "sender_id": message.sender_id,
-            "created_at": message.created_at.isoformat(),
+            "created_at": to_jst(message.created_at).strftime("%Y/%m/%d %H:%M"),
         }
     ), 201
 

@@ -7,6 +7,7 @@ from . import auth_bp
 from .forms import LoginForm, PasswordChangeForm
 from ..extensions import db
 from ..models import User
+from ..decorators import user_required
 
 @auth_bp.route("/login", methods=['GET', 'POST'])
 def login():
@@ -69,6 +70,7 @@ def logout():
 
 @auth_bp.route("/password/change", methods=['GET', 'POST'])
 @login_required
+@user_required
 def password_change():
     form = PasswordChangeForm()
 

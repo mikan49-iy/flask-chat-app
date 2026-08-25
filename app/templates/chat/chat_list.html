@@ -12,7 +12,12 @@
         {% for item in chat_items %}
           <div class="card mb-3">
             <div class="card-body">
-              <h5 class="card-title">{{ item.other_user.name }}</h5>
+              <div class="d-flex align-items-center gap-2">
+                <h5 class="card-title">{{ item.other_user.name }}</h5>
+                {% if not item.other_user.is_active %}
+                  <span class="badge rounded-pill text-bg-secondary">無効</span>
+                {% endif %}
+              </div>
 
               {% if item.other_user.department %}
                 <h6 class="card-subtitle mb-2 text-body-secondary">{{ item.other_user.department }}</h6>

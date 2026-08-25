@@ -17,17 +17,33 @@
             {% endif %}
           </div>
 
+          {% if not other_user.is_active %}
+            <div class="alert alert-secondary" role="alert">
+              このユーザーは現在利用できません。
+            </div>
+          {% endif %}
+
           <div id="message-list" data-conversation-id="{{ conversation.id }}" data-current-user-id="{{ current_user.id }}"></div>
           <div class="chat-input-area">
-            <form id="message-form" method="POST" class="d-flex gap-2 align-items-end">
-              {{ form.hidden_tag() }}
+            {% if other_user.is_active %}
+              <form id="message-form" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="d-flex gap-2 align-items-start">
+                  <div class="flex-grow-1">
+                    {{ form.message(class="form-control") }}
+                  </div>
+                  
+                  {{ form.submit(class="btn btn-chat") }}
+                </div>
 
-              <div class="flex-grow-1">
-                {{ form.message(class="form-control") }}
+                <p id="message-count" class="small text-body-secondary mb-0">0 / 500</p>
+              </form>
+              <p id="message-error" class="text-danger mt-2 mb-0"></p>
+            {% else %}
+              <div class="text-body-secondary">
+                このユーザーには現在メッセージを送信できません。
               </div>
-              {{ form.submit(class="btn btn-chat") }}
-            </form>
-            <p id="message-error" class="text-danger mt-2 mb-0"></p>
+            {% endif %}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ services:
   web:
     build:
       context: .
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -10,6 +11,7 @@ services:
 
   db:
     image: mysql:8.4
+    restart: unless-stopped
 
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -36,6 +38,7 @@ services:
 
   nginx:
     image: nginx:alpine
+    restart: unless-stopped
 
     ports:
       - "80:80"

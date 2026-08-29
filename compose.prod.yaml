@@ -2,6 +2,7 @@ services:
   web:
     build:
       context: .
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -10,6 +11,7 @@ services:
 
   db:
     image: mysql:8.4
+    restart: unless-stopped
 
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -36,15 +38,28 @@ services:
 
   nginx:
     image: nginx:alpine
+    restart: unless-stopped
 
     ports:
       - "80:80"
+      - "443:443"
 
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt:ro
 
     depends_on:
       - web
 
+  certbot:
+    image: certbot/certbot:latest
+
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+
 volumes:
   mysql_data:
+  certbot_www:
+  certbot_conf:
